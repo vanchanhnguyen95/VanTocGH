@@ -8,6 +8,13 @@ namespace ReadSpeedShpFile.Common
         public static readonly string connStr = @"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1";
         public static readonly string connStrDev = @"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1";
 
+        public static readonly string ColSegmendId = @"34";
+        public static readonly string SpInsSpeedLimit = @"[dbo].[Ins_SpeedLimit]";
+        public static readonly string SpInsSpeedLimitParamTable = @"@SpeedLimit";
+
+        public static readonly string SpGetGetSpeedLimitFromSpeedTable = @"[dbo].[Get_GetSpeedLimitFromSpeedTable]";
+        public static readonly string SpGetGetSpeedLimitFromSpeedTableParamTable = @"@SpeedLimit";
+
         public static string fileNameOut = "Out" + DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Day.ToString()
                 + DateTime.Now.Hour.ToString() + DateTime.Now.Minute.ToString() + DateTime.Now.Millisecond.ToString();
 

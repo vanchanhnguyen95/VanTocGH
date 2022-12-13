@@ -1,6 +1,7 @@
 ﻿using CoreSpatial;
 using CoreSpatial.BasicGeometrys;
 using CoreSpatial.CrsNs;
+using Microsoft.Extensions.Configuration;
 using ReadSpeedShpFile.Models;
 using System;
 using System.Collections.Generic;
@@ -15,22 +16,27 @@ namespace ReadSpeedShpFile.Services
 {
     class WriteShpFileV2Service
     {
-        private static string shpPathInput;
-        private static string directoryOutput;
-        private static List<SpeedProviderUpLoadVm> lstSpeed;
-        private static List<SpeedProviderUpLoadVm> lstSpeedFromDb;
-        private static DataTable speedTable;
+        public static IConfigurationRoot? configuration;
+        private static string? shpPathInput;
+        private static string? directoryOutput;
+        private static List<SpeedProviderUpLoadVm>? lstSpeed;
+        private static List<SpeedProviderUpLoadVm>? lstSpeedFromDb;
+        private static DataTable? speedTable;
         private static int precisions = 10;
-        private static int colSegmendId = 34;
 
-        private static List<long> lstSegmentID;
-        private static List<long> lstSegmentIDLine;
-        private static List<SpeedProviderUpLoadVm> lstCreatePolyline;
+        private static List<long>? lstSegmentID;
+        private static List<long>? lstSegmentIDLine;
+        private static List<SpeedProviderUpLoadVm>? lstCreatePolyline;
 
         // Danh sách dùng để tạo shape file point
-        private static List<SpeedProviderUpLoadVm> lstLineChange;// Danh sách các line có vận tốc thay đổi
-        private static List<long> lstSegmentIDLineChange;// Danh sách chứa segmentID của line có vận tốc thay đổi
-        private static List<SpeedProviderUpLoadVm> lstCreatePoint;
+        //private static List<SpeedProviderUpLoadVm> lstLineChange;// Danh sách các line có vận tốc thay đổi
+        //private static List<long> lstSegmentIDLineChange;// Danh sách chứa segmentID của line có vận tốc thay đổi
+        private static List<SpeedProviderUpLoadVm>? lstCreatePoint;
+
+        private static string connString = configuration.GetConnectionString("DataConnection");
+        private static string spGetGetSpeedLimitFromSpeedTable = configuration.GetConnectionString("SpGetGetSpeedLimitFromSpeedTable");
+        private static string spGetGetSpeedLimitFromSpeedTableParamTable = configuration.GetConnectionString("SpGetGetSpeedLimitFromSpeedTableParamTable");
+        private static string colSegmendId = configuration.GetConnectionString("ColSegmendId");
 
         public static bool CreateShpFileFromShpFile()
         {
@@ -126,7 +132,6 @@ namespace ReadSpeedShpFile.Services
                 return false;
 
             if ((!File.Exists(shpPathInput)))
-                //Console.WriteLine("Usage: ShapefileDemo <shapefile.shp>");
                 return false;
 
             return true;
@@ -155,7 +160,7 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    MultiPolyLine multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
+                    MultiPolyLine? multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
 
                     if (multiPolyLine == null)
                     {
@@ -165,7 +170,11 @@ namespace ReadSpeedShpFile.Services
 
                     // Dang quy dinh cot 34 chưa SegmentID
                     //long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[34]);
-                    long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[colSegmendId]);
+                    string colSegment = colSegmendId;
+                    if (string.IsNullOrEmpty(colSegmendId))
+                        colSegment = ColSegmendId;
+
+                    long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[Convert.ToInt32(colSegment)]);
 
                     foreach (var line in multiPolyLine.PolyLines)
                     {
@@ -296,15 +305,23 @@ namespace ReadSpeedShpFile.Services
                 lstSegmentID = new List<long>();
 
                 SqlConnection con;
-                //con = new SqlConnection(@"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1");
-                con = new SqlConnection(connStrDev);
+                if (string.IsNullOrEmpty(connString))
+                    connString = connStrDev;
+
+                con = new SqlConnection(connString);
                 con.Open();
 
-                SqlCommand cmd = new SqlCommand("[dbo].[Get_GetSpeedLimitFromSpeedTable]", con);
+                if (string.IsNullOrEmpty(spGetGetSpeedLimitFromSpeedTable))
+                    spGetGetSpeedLimitFromSpeedTable = SpGetGetSpeedLimitFromSpeedTable;
+
+                if (string.IsNullOrEmpty(spGetGetSpeedLimitFromSpeedTableParamTable))
+                    spGetGetSpeedLimitFromSpeedTableParamTable = SpGetGetSpeedLimitFromSpeedTableParamTable;
+
+                SqlCommand cmd = new SqlCommand(spGetGetSpeedLimitFromSpeedTable, con);//"[dbo].[Get_GetSpeedLimitFromSpeedTable]"
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 // Pass table Valued parameter to Store Procedure
-                SqlParameter sqlParam = cmd.Parameters.AddWithValue("@SpeedLimit", speedTable);
+                SqlParameter sqlParam = cmd.Parameters.AddWithValue(spGetGetSpeedLimitFromSpeedTableParamTable, speedTable);// @SpeedLimit
                 sqlParam.SqlDbType = SqlDbType.Structured;
 
                 // Executing the SQL query
@@ -359,7 +376,7 @@ namespace ReadSpeedShpFile.Services
                 SpeedProviderUpLoadVm lineE;
                 List<SpeedProviderUpLoadVm> lstLineM;
 
-                for (int i = 0; i < lstSegmentID.Count; i++)
+                for (int i = 0; i< lstSegmentID.Count; i++)
                 {
                     lstAdd = lstSpeedFromDb.Where(x => x.SegmentID == lstSegmentID[i]).ToList();
 
@@ -385,10 +402,10 @@ namespace ReadSpeedShpFile.Services
                         && x.Position != $"S-{lstSegmentID[i]}"
                         && x.Position != $"E-{lstSegmentID[i]}").ToList();
                         lstCreatePoint.AddRange(lstLineM);
-                        lstLineM = null;
+                        //lstLineM = null;
                     }
 
-                    lstAdd = null;
+                    //lstAdd = null;
                 }
 
             }
@@ -415,10 +432,7 @@ namespace ReadSpeedShpFile.Services
         {
             try
             {
-                //// Kiểm tra xem có danh sách các điểm cần vẽ Point không
-                //if (!CreateLisCreatePoint())
-                //    return true;
-
+                // Kiểm tra xem có danh sách các điểm cần vẽ Point không
                 if (lstCreatePoint == null)
                    return true;
 

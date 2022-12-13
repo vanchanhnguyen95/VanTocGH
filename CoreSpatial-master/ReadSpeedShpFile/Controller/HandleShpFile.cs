@@ -10,7 +10,7 @@ namespace ReadSpeedShpFile.Controller
     {
         public static void CreatePoint()
         {
-            ReadFile.CreatePointFromShpFile();
+            ReadFile.CreateDataSpeedFromShpFile();
             Console.ReadLine();
         }
 

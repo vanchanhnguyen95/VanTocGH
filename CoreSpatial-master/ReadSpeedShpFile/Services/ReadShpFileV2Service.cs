@@ -9,17 +9,24 @@ using System.IO;
 using System.Linq;
 using static ReadSpeedShpFile.Common.Strings;
 using static ReadSpeedShpFile.Common.CalculateGeo;
+using Microsoft.Extensions.Configuration;
 
 namespace ReadSpeedShpFile.Services
 {
     class ReadShpFileV2Service
     {
-        private static string shpPathInput;
-        private static List<SpeedProviderUpLoadVm> lstSpeed;
-        private static DataTable speedTable;
+        public static IConfigurationRoot? configuration;
+        private static string? shpPathInput;
+        private static List<SpeedProviderUpLoadVm>? lstSpeed;
+        private static DataTable? speedTable;
         private static int precisions = 10;
+       
+        private static string connString = configuration.GetConnectionString("DataConnection");
+        private static string spInsSpeedLimit = configuration.GetConnectionString("SpInsSpeedLimit");
+        private static string spInsSpeedLimitParamTable = configuration.GetConnectionString("SpInsSpeedLimitParamTable");
+        private static string colSegmendId = configuration.GetConnectionString("ColSegmendId");
 
-        public static bool CreatePointFromShpFile()
+        public static bool CreateDataSpeedFromShpFile()
         {
             // Tiêu đề chương trình
             Console.WriteLine(titleString);
@@ -106,7 +113,7 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    MultiPolyLine multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
+                    MultiPolyLine? multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
 
                     if (multiPolyLine == null)
                     {
@@ -115,7 +122,12 @@ namespace ReadSpeedShpFile.Services
                     }
 
                     // Dang quy dinh cot 34 chưa SegmentID
-                    long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[34]);
+                    
+                    string colSegment = colSegmendId;
+                    if (string.IsNullOrEmpty(colSegmendId))
+                        colSegment = ColSegmendId;
+
+                    long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[Convert.ToInt32(colSegment)]);
                     //long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[colSegmendId]);
 
                     foreach (var line in multiPolyLine.PolyLines)
@@ -217,15 +229,26 @@ namespace ReadSpeedShpFile.Services
             try
             {
                 SqlConnection con;
-                //con = new SqlConnection(@"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1");
-                con = new SqlConnection(connStrDev);
+
+                // Kết nối Cơ sở dữ liệu
+                //string connString = configuration.GetConnectionString("DataConnection");
+                if (string.IsNullOrEmpty(connString))
+                    connString = connStrDev;
+
+                con = new SqlConnection(connString);
                 con.Open();
 
-                SqlCommand cmd = new SqlCommand("[dbo].[Ins_SpeedLimit]", con);
+                if (string.IsNullOrEmpty(spInsSpeedLimit))
+                    spInsSpeedLimit = SpInsSpeedLimit;
+
+                if (string.IsNullOrEmpty(spInsSpeedLimitParamTable))
+                    spInsSpeedLimitParamTable = SpInsSpeedLimitParamTable;
+
+                SqlCommand cmd = new SqlCommand(spInsSpeedLimit, con); //[dbo].[Ins_SpeedLimit]
                 cmd.CommandType = CommandType.StoredProcedure;
 
                 // Pass table Valued parameter to Store Procedure
-                SqlParameter sqlParam = cmd.Parameters.AddWithValue("@SpeedLimit", speedTable);
+                SqlParameter sqlParam = cmd.Parameters.AddWithValue(spInsSpeedLimitParamTable, speedTable);//@SpeedLimit
                 sqlParam.SqlDbType = SqlDbType.Structured;
 
                 cmd.ExecuteNonQuery();

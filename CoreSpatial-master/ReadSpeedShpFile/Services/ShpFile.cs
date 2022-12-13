@@ -15,12 +15,12 @@ namespace ReadSpeedShpFile.Services
 {
     class ShpFile
     {
-        private static string shpPathInput;
-        private static string directoryOutput;
+        private static string? shpPathInput;
+        private static string? directoryOutput;
         //private static List<SpeedProviderUpLoadVm> lstSpeed;
-        private static List<Speed3PointUpLoadVm> lstSpeed;
-        private static List<Speed3PointUpLoadVm> lstSpeed50;
-        private static DataTable speedTable;
+        private static List<Speed3PointUpLoadVm>? lstSpeed;
+        private static List<Speed3PointUpLoadVm>? lstSpeed50;
+        private static DataTable? speedTable;
         private static int precisions = 10;
 
         public static void GetShpPathInput()
@@ -68,7 +68,7 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    MultiPolyLine multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
+                    MultiPolyLine? multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
 
                     if (multiPolyLine == null)
                     {
@@ -136,7 +136,7 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    MultiPolyLine multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
+                    MultiPolyLine? multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
 
                     if (multiPolyLine == null)
                     {
