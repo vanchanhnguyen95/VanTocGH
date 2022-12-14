@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ReadSpeedShpFile.Common;
 using Serilog;
 using System;
 using System.IO;
@@ -12,7 +13,7 @@ namespace ReadSpeedShpFile
 {
     internal static class Program
     {
-        public static IConfigurationRoot? configuration;
+        public static IConfigurationRoot configuration;
 
         static int Main(string[] args)
         {

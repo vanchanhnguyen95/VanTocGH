@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using ReadSpeedShpFile.Common;
 using System;
 using System.Threading.Tasks;
 using static ReadSpeedShpFile.Common.Strings;
@@ -20,17 +21,28 @@ namespace ReadSpeedShpFile
 
         public async Task Run()
         {
+            SpeedConfig _speedConfig = new SpeedConfig()
+            {
+                DataConnection = _config.GetConnectionString("DataConnection"),
+                //ColSegmendId = _config.GetConnectionString("ColSegmendId"),
+                ColSegmendId = _config.GetSection("ColSegmendId").Get<string>(),
+                SpInsSpeedLimit = _config.GetSection("SpInsSpeedLimit").Get<string>(),
+                SpInsSpeedLimitParamTable = _config.GetSection("SpInsSpeedLimitParamTable").Get<string>(),
+                SpGetGetSpeedLimitFromSpeedTable = _config.GetSection("SpGetGetSpeedLimitFromSpeedTable").Get<string>(),
+                SpGetGetSpeedLimitFromSpeedTableParamTable = _config.GetSection("SpGetGetSpeedLimitFromSpeedTableParamTable").Get<string>(),
+            };
+
             //List<string> emailAddresses = _config.GetSection("EmailAddresses").Get<List<string>>();
             //foreach (string emailAddress in emailAddresses)
             //{
             //    _logger.LogInformation("Email address: {@EmailAddress}", emailAddress);
             //}
-            Console.Clear();
+            //Console.Clear();
             Console.WriteLine();
             Console.WriteLine(titleString);
             Console.WriteLine(lblChoose1);
             Console.WriteLine(lblChoose2);
-
+          
             int iChoose;// index lựa chọn
             do
             {
@@ -44,12 +56,12 @@ namespace ReadSpeedShpFile
             // Đọc file
             if (iChoose == 1)
             {
-                CreateDataSpeedFromShpFile();
+                CreateDataSpeedFromShpFile(_speedConfig);
             }
             // Cập nhât vận tốc giới hạn, ghi ra shape file
             else if (iChoose == 2)
             {
-                WriteShpFile();
+                WriteShpFile(_speedConfig);
             }
         }
     }

@@ -1,5 +1,7 @@
 ﻿using CoreSpatial;
 using CoreSpatial.BasicGeometrys;
+using Microsoft.Extensions.Configuration;
+using ReadSpeedShpFile.Common;
 using ReadSpeedShpFile.Models;
 using System;
 using System.Collections.Generic;
@@ -7,28 +9,22 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using static ReadSpeedShpFile.Common.Strings;
-using static ReadSpeedShpFile.Common.CalculateGeo;
-using Microsoft.Extensions.Configuration;
-using ReadSpeedShpFile.Common;
 using System.Threading;
+using static ReadSpeedShpFile.Common.CalculateGeo;
+using static ReadSpeedShpFile.Common.Strings;
+
 
 namespace ReadSpeedShpFile.Services
 {
-    class ReadShpFileV2Service
+    public class ReadShpFileV2Service
     {
-        private readonly static IConfigurationRoot? configuration;
         private static string? shpPathInput;
         private static List<SpeedProviderUpLoadVm>? lstSpeed;
         private static DataTable? speedTable;
         private static int precisions = 10;
-       
-        private static string connString = configuration.GetConnectionString("DataConnection");
-        private static string spInsSpeedLimit = configuration.GetConnectionString("SpInsSpeedLimit");
-        private static string spInsSpeedLimitParamTable = configuration.GetConnectionString("SpInsSpeedLimitParamTable");
-        private static string colSegmendId = configuration.GetConnectionString("ColSegmendId");
 
-        public static bool CreateDataSpeedFromShpFile()
+
+        public static bool CreateDataSpeedFromShpFile(SpeedConfig speedConfig)
         {
             // Lấy đường dẫn đến file
             Console.WriteLine(lblInpShpFile);
@@ -49,7 +45,7 @@ namespace ReadSpeedShpFile.Services
                 Thread.Sleep(20);
 
                 // Đọc dữ liệu từ shape file
-                if (!ReadDataFromShpFile())
+                if (!ReadDataFromShpFile(speedConfig))
                 {
                     Console.WriteLine(lblReadFileFl);
                     return false;
@@ -83,7 +79,7 @@ namespace ReadSpeedShpFile.Services
                 Thread.Sleep(20);
 
                 // Cập nhật dữ liệu vào Cơ sở dữ liệu
-                if (!CreateSpeedLimitToDB())
+                if (!CreateSpeedLimitToDB(speedConfig))
                 {
                     Console.WriteLine(lblInpUpdDataToDB + lblSpace + lblFail);
                     return false;
@@ -163,13 +159,12 @@ namespace ReadSpeedShpFile.Services
                 return false;
 
             if ((!File.Exists(shpPathInput)))
-                //Console.WriteLine("Usage: ShapefileDemo <shapefile.shp>");
                 return false;
 
             return true;
         }
 
-        private static bool ReadDataFromShpFile()
+        public static bool ReadDataFromShpFile(SpeedConfig speedConfig)
         {
             try
             {
@@ -191,14 +186,12 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    // Dang quy dinh cot 34 chưa SegmentID
-                    
-                    string colSegment = colSegmendId;
-                    if (string.IsNullOrEmpty(colSegmendId))
+                    // Đang quy định cột 34 chưa SegmentID
+                    string? colSegment = speedConfig.ColSegmendId;
+                    if (string.IsNullOrEmpty(colSegment))
                         colSegment = ColSegmendId;
 
                     long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[Convert.ToInt32(colSegment)]);
-                    //long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[colSegmendId]);
 
                     foreach (var line in multiPolyLine.PolyLines)
                     {
@@ -290,18 +283,19 @@ namespace ReadSpeedShpFile.Services
             return true;
         }
 
-        private static bool CreateSpeedLimitToDB()
+        private static bool CreateSpeedLimitToDB(SpeedConfig speedConfig)
         {
             if (speedTable == null || speedTable.Rows.Count < 0)
-                //Console.WriteLine("Have no data to create in SpeedTable");
                 return false;
 
             try
             {
                 SqlConnection con;
-
                 // Kết nối Cơ sở dữ liệu
-                //string connString = configuration.GetConnectionString("DataConnection");
+                string? connString = speedConfig.DataConnection;
+                string? spInsSpeedLimit = speedConfig.SpInsSpeedLimit;
+                string? spInsSpeedLimitParamTable = speedConfig.SpInsSpeedLimitParamTable;
+
                 if (string.IsNullOrEmpty(connString))
                     connString = connStrDev;
 

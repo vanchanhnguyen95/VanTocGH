@@ -18,7 +18,6 @@ namespace ReadSpeedShpFile.Services
 {
     class WriteShpFileV2Service
     {
-        public static IConfigurationRoot? configuration;
         private static string? shpPathInput;
         private static string? directoryOutput;
         private static List<SpeedProviderUpLoadVm>? lstSpeed;
@@ -35,12 +34,7 @@ namespace ReadSpeedShpFile.Services
         //private static List<long> lstSegmentIDLineChange;// Danh sách chứa segmentID của line có vận tốc thay đổi
         private static List<SpeedProviderUpLoadVm>? lstCreatePoint;
 
-        private static string connString = configuration.GetConnectionString("DataConnection");
-        private static string spGetGetSpeedLimitFromSpeedTable = configuration.GetConnectionString("SpGetGetSpeedLimitFromSpeedTable");
-        private static string spGetGetSpeedLimitFromSpeedTableParamTable = configuration.GetConnectionString("SpGetGetSpeedLimitFromSpeedTableParamTable");
-        private static string colSegmendId = configuration.GetConnectionString("ColSegmendId");
-
-        public static bool CreateShpFileFromShpFile()
+        public static bool CreateShpFileFromShpFile(SpeedConfig speedConfig)
         {
             // Lấy đường dẫn file input
             Console.WriteLine(lblInpShpFile);
@@ -60,7 +54,7 @@ namespace ReadSpeedShpFile.Services
             {
                 int iProcess = 0;
                 // Đọc dữ liệu từ shape file
-                if (!ReadDataFromShpFile())
+                if (!ReadDataFromShpFile(speedConfig))
                 {
                     Console.WriteLine(lblReadFileFl);
                     return false;
@@ -82,7 +76,7 @@ namespace ReadSpeedShpFile.Services
                 Thread.Sleep(20);
 
                 // Enter để Cập nhật vận tốc giới hạn sau khi detect
-                if (!GetSpeedLimitFromSpeedTable())
+                if (!GetSpeedLimitFromSpeedTable(speedConfig))
                 {
                     Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblFail);
                     return false;
@@ -93,7 +87,7 @@ namespace ReadSpeedShpFile.Services
                 Thread.Sleep(20);
 
                 // Cập nhật vận tốc giới hạn từ Cơ sở dữ liệu, input là danh sách các điểm đọc từ shape file
-                if (!GetSpeedLimitFromSpeedTable())
+                if (!GetSpeedLimitFromSpeedTable(speedConfig))
                 {
                     Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblFail);
                     return false;
@@ -231,7 +225,7 @@ namespace ReadSpeedShpFile.Services
                 Directory.CreateDirectory(directoryOutput);
         }
 
-        private static bool ReadDataFromShpFile()
+        private static bool ReadDataFromShpFile(SpeedConfig speedConfig)
         {
             try
             {
@@ -255,8 +249,8 @@ namespace ReadSpeedShpFile.Services
 
                     // Dang quy dinh cot 34 chưa SegmentID
                     //long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[34]);
-                    string colSegment = colSegmendId;
-                    if (string.IsNullOrEmpty(colSegmendId))
+                    string? colSegment = speedConfig.ColSegmendId;
+                    if (string.IsNullOrEmpty(colSegment))
                         colSegment = ColSegmendId;
 
                     long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[Convert.ToInt32(colSegment)]);
@@ -379,7 +373,7 @@ namespace ReadSpeedShpFile.Services
             return true;
         }
 
-        private static bool GetSpeedLimitFromSpeedTable()
+        private static bool GetSpeedLimitFromSpeedTable(SpeedConfig speedConfig)
         {
             try
             {
@@ -390,6 +384,11 @@ namespace ReadSpeedShpFile.Services
                 lstSegmentID = new List<long>();
 
                 SqlConnection con;
+                // Kết nối Cơ sở dữ liệu
+                string? connString = speedConfig.DataConnection;
+                string? spGetGetSpeedLimitFromSpeedTable = speedConfig.SpGetGetSpeedLimitFromSpeedTable;
+                string? spGetGetSpeedLimitFromSpeedTableParamTable = speedConfig.SpGetGetSpeedLimitFromSpeedTableParamTable;
+
                 if (string.IsNullOrEmpty(connString))
                     connString = connStrDev;
 

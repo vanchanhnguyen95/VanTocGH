@@ -5,8 +5,10 @@ namespace ReadSpeedShpFile.Common
     class Strings
     {
         // SpeedWebAPI
-        public static readonly string connStr = @"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1";
-        public static readonly string connStrDev = @"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1";
+        public static readonly string connStr = @"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=Dev_SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1";
+        public static readonly string connStrDev = @"Data Source=NC-CHANHNV\MSSQLSERVER2;Initial Catalog=Dev_SpeedWebAPI;Persist Security Info=True;User ID=sa;Password=1";
+
+        public string Testaaaa = @"";
 
         public static readonly string ColSegmendId = @"34";
         public static readonly string SpInsSpeedLimit = @"[dbo].[Ins_SpeedLimit]";
