@@ -25,7 +25,7 @@ namespace ReadSpeedShpFile
             //{
             //    _logger.LogInformation("Email address: {@EmailAddress}", emailAddress);
             //}
-
+            Console.Clear();
             Console.WriteLine();
             Console.WriteLine(titleString);
             Console.WriteLine(lblChoose1);
@@ -37,21 +37,20 @@ namespace ReadSpeedShpFile
                 Console.Write(lblChoose1Or2);
             } while (!int.TryParse(Console.ReadLine(), out iChoose));
 
-            Console.WriteLine($"Đã chọn:  {iChoose}");
-            Console.Clear();
+            Console.WriteLine($">>Đã chọn:  {iChoose}");
+            //Console.Clear();
             if (iChoose != 1 && iChoose != 2)
                 Environment.Exit(0);
             // Đọc file
             if (iChoose == 1)
             {
-                CreatePoint();
+                CreateDataSpeedFromShpFile();
             }
             // Cập nhât vận tốc giới hạn, ghi ra shape file
             else if (iChoose == 2)
             {
                 WriteShpFile();
             }
-            Console.ReadLine();
         }
     }
 }

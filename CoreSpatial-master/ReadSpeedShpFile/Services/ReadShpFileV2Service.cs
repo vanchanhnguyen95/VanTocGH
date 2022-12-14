@@ -10,12 +10,14 @@ using System.Linq;
 using static ReadSpeedShpFile.Common.Strings;
 using static ReadSpeedShpFile.Common.CalculateGeo;
 using Microsoft.Extensions.Configuration;
+using ReadSpeedShpFile.Common;
+using System.Threading;
 
 namespace ReadSpeedShpFile.Services
 {
     class ReadShpFileV2Service
     {
-        public static IConfigurationRoot? configuration;
+        private readonly static IConfigurationRoot? configuration;
         private static string? shpPathInput;
         private static List<SpeedProviderUpLoadVm>? lstSpeed;
         private static DataTable? speedTable;
@@ -28,9 +30,6 @@ namespace ReadSpeedShpFile.Services
 
         public static bool CreateDataSpeedFromShpFile()
         {
-            // Tiêu đề chương trình
-            Console.WriteLine(titleString);
-
             // Lấy đường dẫn đến file
             Console.WriteLine(lblInpShpFile);
             GetShpPathInput();
@@ -38,42 +37,113 @@ namespace ReadSpeedShpFile.Services
             {
                 Console.WriteLine(lblNoPath);
                 return false;
-            }    
-               
-            // Đọc dữ liệu từ shape file
-            Console.WriteLine(lblReadFile);
-            if (!ReadDataFromShpFile())
-            {
-                Console.WriteLine(lblReadFileFl);
-                return false;
             }
-            Console.WriteLine(lblReadFileSc);
 
-            // Enter để tạo dữ liệu từ shape file để cập nhật vào Cơ sở dữ liệu
-            Console.WriteLine(lblInpCreateDataFromShpFile);
-            Console.ReadLine();
-            Console.WriteLine(lblInProcess);
-
-            if (!CreateSpeedTable())
+            using (var progress = new ProgressBar())
             {
-                Console.WriteLine(lblInpCreateDataFromShpFileToDb + lblSpace + lblFail);
-                return false;
+                Console.Write(lblInProcess);
+                int iProcess = 0;
+
+                iProcess += 10;//10
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Đọc dữ liệu từ shape file
+                if (!ReadDataFromShpFile())
+                {
+                    Console.WriteLine(lblReadFileFl);
+                    return false;
+                }
+
+                iProcess += 10;//20
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                iProcess += 10;//30
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Tạo dữ liệu từ shape file để cập nhật vào Cơ sở dữ liệu
+                if (!CreateSpeedTable())
+                {
+                    Console.WriteLine(lblInpCreateDataFromShpFileToDb + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 10;//40
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                iProcess += 10;//50
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                iProcess += 20;//70
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Cập nhật dữ liệu vào Cơ sở dữ liệu
+                if (!CreateSpeedLimitToDB())
+                {
+                    Console.WriteLine(lblInpUpdDataToDB + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 10;//90
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                iProcess += 10;//100
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
             }
-            Console.WriteLine(lblInpCreateDataFromShpFileToDb + lblSpace + lblSuccess);
 
-            // Enter để tiến hành Cập nhật dữ liệu vào Cơ sở dữ liệu
-            Console.WriteLine(lblInpUpdDataToDBProcess);
-            Console.ReadLine();
-            Console.WriteLine(lblInProcess);
+            //// Tiêu đề chương trình
+            //Console.WriteLine(titleString);
 
-            if (!CreateSpeedLimitToDB())
-            {
-                Console.WriteLine(lblInpUpdDataToDB + lblSpace + lblFail);
-                return false;
-            }
-            Console.WriteLine(lblInpUpdDataToDB + lblSpace + lblSuccess);
+            //// Lấy đường dẫn đến file
+            //Console.WriteLine(lblInpShpFile);
+            //GetShpPathInput();
+            //if (!HasShpPathInput())
+            //{
+            //    Console.WriteLine(lblNoPath);
+            //    return false;
+            //}    
 
-            Console.ReadLine();
+            //// Đọc dữ liệu từ shape file
+            //Console.WriteLine(lblReadFile);
+            //if (!ReadDataFromShpFile())
+            //{
+            //    Console.WriteLine(lblReadFileFl);
+            //    return false;
+            //}
+            //Console.WriteLine(lblReadFileSc);
+
+            //// Enter để tạo dữ liệu từ shape file để cập nhật vào Cơ sở dữ liệu
+            //Console.WriteLine(lblInpCreateDataFromShpFile);
+            //Console.ReadLine();
+            //Console.WriteLine(lblInProcess);
+
+            //if (!CreateSpeedTable())
+            //{
+            //    Console.WriteLine(lblInpCreateDataFromShpFileToDb + lblSpace + lblFail);
+            //    return false;
+            //}
+            //Console.WriteLine(lblInpCreateDataFromShpFileToDb + lblSpace + lblSuccess);
+
+            //// Enter để tiến hành Cập nhật dữ liệu vào Cơ sở dữ liệu
+            //Console.WriteLine(lblInpUpdDataToDBProcess);
+            //Console.ReadLine();
+            //Console.WriteLine(lblInProcess);
+
+            //if (!CreateSpeedLimitToDB())
+            //{
+            //    Console.WriteLine(lblInpUpdDataToDB + lblSpace + lblFail);
+            //    return false;
+            //}
+            //Console.WriteLine(lblInpUpdDataToDB + lblSpace + lblSuccess);
+
+            //Console.ReadLine();
 
             return true;
         }

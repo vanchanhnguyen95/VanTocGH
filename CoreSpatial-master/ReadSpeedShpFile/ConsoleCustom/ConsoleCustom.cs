@@ -4,18 +4,6 @@ namespace ReadSpeedShpFile.ConsoleCustom
 {
     class ConsoleCustom
     {
-        public static void WriteLineString(string label = "")
-        {
-            if(string.IsNullOrEmpty(label.Trim()))
-                Console.WriteLine();
-            Console.WriteLine(label);
-        }
-
-        public static void WriteString(string label = "")
-        {
-            if (string.IsNullOrEmpty(label.Trim()))
-                Console.Write(label);
-        }
 
         public static void ShowProgressBar(int progress, int total)
         {

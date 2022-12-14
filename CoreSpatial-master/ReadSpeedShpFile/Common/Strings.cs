@@ -49,8 +49,8 @@ namespace ReadSpeedShpFile.Common
         public static string lblReadFileFl = @">>Đọc file thất bại";
         public static string lblReadFileFl_EN = @">>Read file fail";
 
-        public static string lblInProcess = @">>đang tiến hành....................................................";
-        public static string lblInProcess_EN = ">>in progress....................................................";
+        public static string lblInProcess = @">>đang tiến hành....";
+        public static string lblInProcess_EN = ">>in progress....";
 
         public static string lblSuccess = "thành công";
         public static string lblSuccess_EN = "success";

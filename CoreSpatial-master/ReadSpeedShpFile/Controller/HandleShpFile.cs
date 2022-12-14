@@ -8,16 +8,18 @@ namespace ReadSpeedShpFile.Controller
 {
     class HandleShpFile
     {
-        public static void CreatePoint()
+        public static void CreateDataSpeedFromShpFile()
         {
             ReadFile.CreateDataSpeedFromShpFile();
             Console.ReadLine();
+            Environment.Exit(0);
         }
 
         public static void WriteShpFile()
         {
             WriteFile.CreateShpFileFromShpFile();
             Console.ReadLine();
+            Environment.Exit(0);
         }
     }
 }

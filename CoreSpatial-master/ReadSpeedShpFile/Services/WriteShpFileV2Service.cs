@@ -2,6 +2,7 @@
 using CoreSpatial.BasicGeometrys;
 using CoreSpatial.CrsNs;
 using Microsoft.Extensions.Configuration;
+using ReadSpeedShpFile.Common;
 using ReadSpeedShpFile.Models;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using static ReadSpeedShpFile.Common.CalculateGeo;
 using static ReadSpeedShpFile.Common.Strings;
 
@@ -40,9 +42,6 @@ namespace ReadSpeedShpFile.Services
 
         public static bool CreateShpFileFromShpFile()
         {
-            // Tiêu đề chương trình
-            Console.WriteLine(titleString);
-
             // Lấy đường dẫn file input
             Console.WriteLine(lblInpShpFile);
             GetShpPathInput();
@@ -55,66 +54,152 @@ namespace ReadSpeedShpFile.Services
             // Lấy đường dẫn file output
             Console.WriteLine(lblOutpShpFile);
             GetDirectoryOutput();
-            Console.WriteLine(lblInProcess);
 
-            // Đọc dữ liệu từ shape file
-            Console.WriteLine(lblReadFile);
-            if (!ReadDataFromShpFile())
+            Console.Write(lblInProcess);
+            using (var progress = new ProgressBar())
             {
-                Console.WriteLine(lblReadFileFl);
-                return false;
+                int iProcess = 0;
+                // Đọc dữ liệu từ shape file
+                if (!ReadDataFromShpFile())
+                {
+                    Console.WriteLine(lblReadFileFl);
+                    return false;
+                }
+
+                iProcess += 10;//10
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Enter để tạo dữ liệu từ shape file để cập nhật vận tốc giới hạn từ Cơ sở dữ liệu
+                if (!CreateSpeedTable())
+                {
+                    Console.WriteLine(lblOutpCreateDataFromShpFile + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 10;//20
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Enter để Cập nhật vận tốc giới hạn sau khi detect
+                if (!GetSpeedLimitFromSpeedTable())
+                {
+                    Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 20;//40
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Cập nhật vận tốc giới hạn từ Cơ sở dữ liệu, input là danh sách các điểm đọc từ shape file
+                if (!GetSpeedLimitFromSpeedTable())
+                {
+                    Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 30;//70
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Phân tích dữ liệu để tạo shape file dạng point hay polyline
+                // Enter để Phân tích dữ liệu để tạo shape file dạng point hay polyline
+                
+                if (!GetDataCreateShpFile())
+                {
+                    Console.WriteLine(lblOutpAnylisData + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 10;//80
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                // Enter để tiến hành tạo file shape file
+                if (!WriteShpFile())
+                {
+                    Console.WriteLine(lblOutpWriteShpFile + lblSpace + lblFail);
+                    return false;
+                }
+
+                iProcess += 10;//90
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                iProcess += 5;//95
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+
+                iProcess += 5;//100
+                progress.Report((double)iProcess / 100);
+                Thread.Sleep(20);
+                //return true;
             }
-            Console.WriteLine(lblReadFileSc);
-
-            // Enter để tạo dữ liệu từ shape file để cập nhật vận tốc giới hạn từ Cơ sở dữ liệu
-            Console.WriteLine(lblOutpCreateDataFromShpFileFromDB);
-            Console.ReadLine();
-            Console.WriteLine(lblInProcess);
-
-            if (!CreateSpeedTable())
-            {
-                Console.WriteLine(lblOutpCreateDataFromShpFile + lblSpace + lblFail);
-                return false;
-            }
-            Console.WriteLine(lblOutpCreateDataFromShpFile + lblSpace + lblSuccess);
-
-            // Ender để Cập nhật vận tốc giới hạn sau khi detect
-            Console.WriteLine(lblOutpUpdSpeedAfDetectFromDB);
-            Console.ReadLine();
-            Console.WriteLine(lblInProcess);
-
-            // Cập nhật vận tốc giới hạn từ Cơ sở dữ liệu, input là danh sách các điểm đọc từ shape file
-            if (!GetSpeedLimitFromSpeedTable())
-            {
-                Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblFail);
-                return false;
-            }
-            Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblSuccess);
-
-            // Phân tích dữ liệu để tạo shape file dạng point hay polyline
-            // Enter để Phân tích dữ liệu để tạo shape file dạng point hay polyline
-            Console.WriteLine(lblOutpAnylisDataPointOrPolyline);
-            Console.ReadLine();
-            Console.WriteLine(lblInProcess);
-            if (!GetDataCreateShpFile())
-            {
-                Console.WriteLine(lblOutpAnylisData + lblSpace + lblFail);
-                return false;
-            }
-            Console.WriteLine(lblOutpAnylisData + lblSpace + lblSuccess);
-
-            // Enter để tiến hành tạo file shape file
-            Console.WriteLine(lblOutpWriteShpFileProcess);
-            Console.ReadLine();
-            Console.WriteLine(lblInProcess);
-            if (!WriteShpFile())
-            {
-                Console.WriteLine(lblOutpWriteShpFile + lblSpace + lblFail);
-                return false;
-            }
-            Console.WriteLine(lblOutpWriteShpFile + lblSpace + lblSuccess);
-
+            Console.WriteLine();
+            Console.WriteLine(lblSuccess);
+            Console.WriteLine(@"Enter để kết thúc!");
+            //Console.WriteLine("Done.");
             return true;
+
+            //// Đọc dữ liệu từ shape file
+            //Console.WriteLine(lblReadFile);
+            //if (!ReadDataFromShpFile())
+            //{
+            //    Console.WriteLine(lblReadFileFl);
+            //    return false;
+            //}
+            //Console.WriteLine(lblReadFileSc);
+
+            //// Enter để tạo dữ liệu từ shape file để cập nhật vận tốc giới hạn từ Cơ sở dữ liệu
+            //Console.WriteLine(lblOutpCreateDataFromShpFileFromDB);
+            //Console.ReadLine();
+            //Console.WriteLine(lblInProcess);
+
+            //if (!CreateSpeedTable())
+            //{
+            //    Console.WriteLine(lblOutpCreateDataFromShpFile + lblSpace + lblFail);
+            //    return false;
+            //}
+            //Console.WriteLine(lblOutpCreateDataFromShpFile + lblSpace + lblSuccess);
+
+            //// Enter để Cập nhật vận tốc giới hạn sau khi detect
+            //Console.WriteLine(lblOutpUpdSpeedAfDetectFromDB);
+            //Console.ReadLine();
+            //Console.WriteLine(lblInProcess);
+
+            //// Cập nhật vận tốc giới hạn từ Cơ sở dữ liệu, input là danh sách các điểm đọc từ shape file
+            //if (!GetSpeedLimitFromSpeedTable())
+            //{
+            //    Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblFail);
+            //    return false;
+            //}
+            //Console.WriteLine(lblOutpUpdSpeedAfDetect + lblSpace + lblSuccess);
+
+            //// Phân tích dữ liệu để tạo shape file dạng point hay polyline
+            //// Enter để Phân tích dữ liệu để tạo shape file dạng point hay polyline
+            //Console.WriteLine(lblOutpAnylisDataPointOrPolyline);
+            //Console.ReadLine();
+            //Console.WriteLine(lblInProcess);
+            //if (!GetDataCreateShpFile())
+            //{
+            //    Console.WriteLine(lblOutpAnylisData + lblSpace + lblFail);
+            //    return false;
+            //}
+            //Console.WriteLine(lblOutpAnylisData + lblSpace + lblSuccess);
+
+            //// Enter để tiến hành tạo file shape file
+            //Console.WriteLine(lblOutpWriteShpFileProcess);
+            //Console.ReadLine();
+            //Console.WriteLine(lblInProcess);
+            //if (!WriteShpFile())
+            //{
+            //    Console.WriteLine(lblOutpWriteShpFile + lblSpace + lblFail);
+            //    return false;
+            //}
+            //Console.WriteLine(lblOutpWriteShpFile + lblSpace + lblSuccess);
+
+            //return true;
         }
 
         private static void GetShpPathInput()

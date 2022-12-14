@@ -15,15 +15,15 @@ namespace ReadSpeedShpFile.Services
 {
     class ReadShpFileV2
     {
-        private static string shpPathInput;
-        private static string directoryOutput;
+        private static string? shpPathInput;
+        private static string? directoryOutput;
         //private static List<SpeedProviderUpLoadVm> lstSpeed;
-        private static List<Speed3PointUpLoadVm> lstSpeed;
-        private static List<Speed3PointUpLoadVm> lstSpeedAnylysOver50;// Danh sách chưa các điểm đầu, cuối có kc > 50
-        private static List<long> lstSegmentID; // Danh sách Point > 50
-        private static List<Speed3PointUpLoadVm> lstSpeedOver50; // Danh sách Point > 50
-        private static List<Speed3PointUpLoadVm> lstSpeedUnder50; // Danh sách Point <= 50
-        private static DataTable speedTable;
+        private static List<Speed3PointUpLoadVm>? lstSpeed;
+        private static List<Speed3PointUpLoadVm>? lstSpeedAnylysOver50;// Danh sách chưa các điểm đầu, cuối có kc > 50
+        private static List<long>? lstSegmentID; // Danh sách Point > 50
+        private static List<Speed3PointUpLoadVm>? lstSpeedOver50; // Danh sách Point > 50
+        private static List<Speed3PointUpLoadVm>? lstSpeedUnder50; // Danh sách Point <= 50
+        private static DataTable? speedTable;
         private static int precisions = 10;
         public static int colSegmendId = 34;
 
@@ -78,7 +78,7 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    MultiPolyLine multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
+                    MultiPolyLine? multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
 
                     if (multiPolyLine == null)
                     {
@@ -235,10 +235,6 @@ namespace ReadSpeedShpFile.Services
                         ProviderType = 1,
                         SegmentID = lstSegmentID[i]
                     });
-
-                    //lstPoint = null;
-                    startPoint = null;
-                    endPoint = null;
                 }
             }
             catch (Exception ex)
@@ -339,7 +335,7 @@ namespace ReadSpeedShpFile.Services
                         return false;
                     }
 
-                    MultiPolyLine multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
+                    MultiPolyLine? multiPolyLine = fe.Geometry.BasicGeometry as MultiPolyLine;
 
                     if (multiPolyLine == null)
                     {
@@ -478,9 +474,9 @@ namespace ReadSpeedShpFile.Services
                         SegmentID = lstSegmentID[i]
                     });
 
-                    lstPoint = null;
-                    startPoint = null;
-                    endPoint = null;
+                    //lstPoint = null;
+                    //startPoint = null;
+                    //endPoint = null;
                 }
             }
             catch (Exception ex)
