@@ -37,7 +37,7 @@ namespace ReadSpeedShpFile.Services
 
             using (var progress = new ProgressBar())
             {
-                Console.Write(lblInProcess);
+                //Console.Write(lblInProcess);
                 int iProcess = 0;
 
                 iProcess += 10;//10
