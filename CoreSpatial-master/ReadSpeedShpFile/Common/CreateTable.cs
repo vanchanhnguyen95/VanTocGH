@@ -13,11 +13,12 @@ namespace ReadSpeedShpFile.Common
             public decimal Lat { get; set; }// Y
             public decimal Lng { get; set; }// X
             public int? ProviderType { get; set; } = 1;//1:Navital; 2:VietMap
-            public string Position { get; set; }
+            public string? Position { get; set; }
             public int? MinSpeed { get; set; } = 0;
             public int? MaxSpeed { get; set; } = 0;
             public bool? PointError { get; set; } = false;//True: Tọa độ cung cấp bị lỗi, False: Tọa độ cung cấp ko bị lỗi
             public long? SegmentID { get; set; }
+            public bool? IsUpdateSpeed { get; set; }
             
             public DateTime? CreatedDate { get; set; }
             public DateTime? UpdatedDate { get; set; }
@@ -40,6 +41,7 @@ namespace ReadSpeedShpFile.Common
                     new SqlMetaData("MaxSpeed", SqlDbType.Int),
                     new SqlMetaData("PointError", SqlDbType.Bit),
                     new SqlMetaData("SegmentID", SqlDbType.BigInt),
+                    new SqlMetaData("IsUpdateSpeed", SqlDbType.Bit),
                     new SqlMetaData("CreatedDate", SqlDbType.DateTime),
                     new SqlMetaData("UpdatedDate", SqlDbType.DateTime),
                     new SqlMetaData("CreatedBy", SqlDbType.VarChar),
@@ -52,12 +54,13 @@ namespace ReadSpeedShpFile.Common
                 {
                     ret.SetDecimal(0, (decimal)data.Lat);
                     ret.SetDecimal(0, (decimal)data.Lng);
-                    ret.SetInt32(0, (int)data.ProviderType);
-                    ret.SetString(0, (string)data.Position);
+                    ret.SetInt32(0, value: (int)data.ProviderType);
+                    ret.SetString(0, data.Position);
                     ret.SetInt32(0, (int)data.MinSpeed);
                     ret.SetInt32(0, (int)data.MaxSpeed);
                     ret.SetBoolean(0, (bool)data.PointError);
                     ret.SetInt64(0, (long)data.SegmentID);
+                    ret.SetBoolean(0, (bool)data.IsUpdateSpeed);
                     ret.SetDateTime(0, data.CreatedDate ?? DateTime.Now);
                     ret.SetDateTime(0, data.UpdatedDate ?? DateTime.Now);
                     ret.SetString(0, data.CreatedBy);
@@ -80,7 +83,8 @@ namespace ReadSpeedShpFile.Common
             dt.Columns.Add("MaxSpeed", typeof(Int32));
             dt.Columns.Add("PointError", typeof(bool));
             dt.Columns.Add("SegmentID", typeof(Int64));
-           
+            dt.Columns.Add("IsUpdateSpeed", typeof(bool));
+
             dt.Columns.Add("CreatedDate", typeof(DateTime));
             dt.Columns.Add("UpdatedDate", typeof(DateTime));
             dt.Columns.Add("CreatedBy", typeof(string));

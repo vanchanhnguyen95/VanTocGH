@@ -210,7 +210,7 @@ namespace ReadSpeedShpFile.Services
             if (Path.GetExtension(shpPathInput) != lblDotShp)
                 return false;
 
-            if ((!File.Exists(shpPathInput)))
+            if (!File.Exists(shpPathInput))
                 return false;
 
             return true;
@@ -257,84 +257,83 @@ namespace ReadSpeedShpFile.Services
 
                     foreach (var line in multiPolyLine.PolyLines)
                     {
-                        //float dis = CalculateDistance(line.Points[0].X, line.Points[0].Y, line.Points[line.Points.Count() - 1].X, line.Points[line.Points.Count() - 1].Y);
-                        // Thêm điểm đầu
-                        lstSpeed.Add(new SpeedProviderUpLoadVm()
+                        for (int i = 0; i < line.Points.Count(); i++)
                         {
-                            Lat = Math.Round((decimal)line.Points[0].Y, precisions),
-                            Lng = Math.Round((decimal)line.Points[0].X, precisions),
-                            Position = $"S-{segmentID}",
-                            ProviderType = 1,
-                            SegmentID = segmentID
-                        });
+                            string position;
+                            if (i == 0)
+                            {
+                                position = $"S-{segmentID}";
+                            }
+                            else if (i == line.Points.Count() - 1)
+                            {
+                                position = $"E-{segmentID}";
+                            }
+                            else
+                            {
+                                position = $"M-{segmentID}-{i - 1}";
+                            }
 
-                        // Thêm điểm cuối
-                        lstSpeed.Add(new SpeedProviderUpLoadVm()
-                        {
-                            Lat = Math.Round((decimal)line.Points[line.Points.Count() - 1].Y, precisions),
-                            Lng = Math.Round((decimal)line.Points[line.Points.Count() - 1].X, precisions),
-                            Position = $"E-{segmentID}",
-                            ProviderType = 1,
-                            SegmentID = segmentID
-                        });
+                            lstSpeed.Add(new SpeedProviderUpLoadVm()
+                            {
+                                Lat = Math.Round((decimal)line.Points[i].Y, precisions),
+                                Lng = Math.Round((decimal)line.Points[i].X, precisions),
+                                Position = position,
+                                ProviderType = 1,
+                                SegmentID = segmentID
+                            });
 
-                        // Mặc định lấy 2 điểm ở bên trong, tính ra khoảng cách rồi mình chia làm 3 đoạn
-                        float partPoint = (CalculateDistance(line.Points[0].Y, line.Points[0].X
-                            , line.Points[line.Points.Count() - 1].Y, line.Points[line.Points.Count() - 1].X) / 2);
+                        }
 
-                        ClsPoint first = new ClsPoint() { Latitude = line.Points[0].Y, Longitude = line.Points[0].X };
-                        ClsPoint second = new ClsPoint() { Latitude = line.Points[line.Points.Count() - 1].Y, Longitude = line.Points[line.Points.Count() - 1].X };
-                        List<ClsPoint> lstPoint = GetVituralPoint(first, second, (int)partPoint);
+                        #region method 1
+                        //// Thêm điểm đầu
+                        //lstSpeed.Add(new SpeedProviderUpLoadVm()
+                        //{
+                        //    Lat = Math.Round((decimal)line.Points[0].Y, precisions),
+                        //    Lng = Math.Round((decimal)line.Points[0].X, precisions),
+                        //    Position = $"S-{segmentID}", ProviderType = 1, SegmentID = segmentID
+                        //});
 
-                        // Thêm ở giữa 2 vị trí
-                        lstSpeed.Add(new SpeedProviderUpLoadVm()
-                        {
-                            Lat = Math.Round((decimal)lstPoint[0].Latitude, precisions),
-                            Lng = Math.Round((decimal)lstPoint[0].Longitude, precisions),
-                            Position = $"M-{segmentID}-{0}",
-                            ProviderType = 1,
-                            MinSpeed = 1,
-                            MaxSpeed = 1,
-                            SegmentID = segmentID
-                        });
+                        //// Thêm điểm cuối
+                        //lstSpeed.Add(new SpeedProviderUpLoadVm()
+                        //{
+                        //    Lat = Math.Round((decimal)line.Points[line.Points.Count() - 1].Y, precisions),
+                        //    Lng = Math.Round((decimal)line.Points[line.Points.Count() - 1].X, precisions),
+                        //    Position = $"E-{segmentID}", ProviderType = 1, SegmentID = segmentID
+                        //});
 
-                        lstSpeed.Add(new SpeedProviderUpLoadVm()
-                        {
-                            Lat = Math.Round((decimal)lstPoint[lstPoint.Count() - 1].Latitude, precisions),
-                            Lng = Math.Round((decimal)lstPoint[lstPoint.Count() - 1].Longitude, precisions),
-                            Position = $"M-{segmentID}-{1}",
-                            ProviderType = 1,
-                            SegmentID = segmentID
-                        });
+                        //// Mặc định lấy 2 điểm ở bên trong, tính ra khoảng cách rồi mình chia làm 3 đoạn
+                        //float partPoint = (CalculateDistance(line.Points[0].Y, line.Points[0].X
+                        //    , line.Points[line.Points.Count() - 1].Y, line.Points[line.Points.Count() - 1].X) / 2);
 
-                        segmentID = 0;
+                        //ClsPoint first = new ClsPoint() { Latitude = line.Points[0].Y, Longitude = line.Points[0].X };
+                        //ClsPoint second = new ClsPoint() { Latitude = line.Points[line.Points.Count() - 1].Y, Longitude = line.Points[line.Points.Count() - 1].X };
+                        //List<ClsPoint> lstPoint = GetVituralPoint(first, second, (int)partPoint);
+
+                        //// Thêm ở giữa 2 vị trí
+                        //lstSpeed.Add(new SpeedProviderUpLoadVm()
+                        //{
+                        //    Lat = Math.Round((decimal)lstPoint[0].Latitude, precisions),
+                        //    Lng = Math.Round((decimal)lstPoint[0].Longitude, precisions),
+                        //    Position = $"M-{segmentID}-{0}",
+                        //    ProviderType = 1,
+                        //    MinSpeed = 1,
+                        //    MaxSpeed = 1,
+                        //    SegmentID = segmentID
+                        //});
+
+                        //lstSpeed.Add(new SpeedProviderUpLoadVm()
+                        //{
+                        //    Lat = Math.Round((decimal)lstPoint[lstPoint.Count() - 1].Latitude, precisions),
+                        //    Lng = Math.Round((decimal)lstPoint[lstPoint.Count() - 1].Longitude, precisions),
+                        //    Position = $"M-{segmentID}-{1}",
+                        //    ProviderType = 1,
+                        //    SegmentID = segmentID
+                        //});
+
+                        //segmentID = 0;
+
+                        #endregion
                     }
-
-                    //foreach (var line in multiPolyLine.PolyLines)
-                    //{
-                    //    //float dis = CalculateDistance(line.Envelope.MinX, line.Envelope.MinY, line.Envelope.MaxX, line.Envelope.MaxY);
-                    //    float dis = CalculateDistance(line.Points[0].X, line.Points[0].Y, line.Points[line.Points.Count() - 1].X, line.Points[line.Points.Count() - 1].Y);
-                    //    // Thêm điểm đầu
-                    //    lstSpeed.Add(new SpeedProviderUpLoadVm()
-                    //    {
-                    //        Lat = Math.Round(line.Points[0].Y, precisions),
-                    //        Lng = Math.Round(line.Points[0].X, precisions),
-                    //        Position = $"S-{segmentID}",
-                    //        ProviderType = 1,
-                    //        SegmentID = segmentID
-                    //    });
-                    //    // Thêm điểm cuối
-                    //    lstSpeed.Add(new SpeedProviderUpLoadVm()
-                    //    {
-                    //        Lat = Math.Round(line.Points[line.Points.Count() - 1].Y, precisions),
-                    //        Lng = Math.Round(line.Points[line.Points.Count() - 1].X, precisions),
-                    //        Position = $"E-{segmentID}",
-                    //        ProviderType = 1,
-                    //        SegmentID = segmentID
-                    //    });
-
-                    //    segmentID = 0;
-                    //}
 
                 }
 
@@ -353,7 +352,6 @@ namespace ReadSpeedShpFile.Services
             try
             {
                 if (lstSpeed == null || (!lstSpeed.Any() || lstSpeed.Count() == 0))
-                    //Console.WriteLine("Have no data to create SpeedTable");
                     return false;
 
                 speedTable = Common.Common.CreateTableSpeedLimit3Point();
@@ -361,7 +359,7 @@ namespace ReadSpeedShpFile.Services
                 {
                     speedTable.Rows.Add(item.Lat, item.Lng, item.ProviderType, item.Position,
                         0, 0,
-                        false, item.SegmentID, DateTime.Now, null, "UploadFile", null, 0, 0);
+                        false, item.SegmentID, false, DateTime.Now, null, "UploadFile", null, 0, 0);
                 }
             }
             catch (Exception ex)
@@ -418,7 +416,9 @@ namespace ReadSpeedShpFile.Services
                     itemAdd.Lat = Convert.ToDecimal(sdr[0].ToString());
                     itemAdd.Lng = Convert.ToDecimal(sdr[1].ToString());
                     itemAdd.ProviderType = Convert.ToInt32(sdr[2].ToString());
+#pragma warning disable CS8601 // Possible null reference assignment.
                     itemAdd.Position = sdr[3].ToString();
+#pragma warning restore CS8601 // Possible null reference assignment.
                     itemAdd.MinSpeed = Convert.ToInt32(sdr[4].ToString());
                     itemAdd.MaxSpeed = Convert.ToInt32(sdr[5].ToString());
                     itemAdd.PointError = false;
@@ -426,9 +426,7 @@ namespace ReadSpeedShpFile.Services
 
                     // Lấy danh sách những SegmengId có vận tốc giới hạn trong Cơ sở dữ liệu
                     if (!lstSegmentID.Where(x => x == itemAdd.SegmentID).Any())
-                    {
                         lstSegmentID.Add(itemAdd.SegmentID);
-                    }
 
                     lstSpeedFromDb.Add(itemAdd);
                 }
@@ -481,15 +479,15 @@ namespace ReadSpeedShpFile.Services
                     }
                     else
                     {
-                        lstLineM = new List<SpeedProviderUpLoadVm>();
-                        lstLineM = lstAdd.Where(x => x.SegmentID == lstSegmentID[i]
-                        && x.Position != $"S-{lstSegmentID[i]}"
-                        && x.Position != $"E-{lstSegmentID[i]}").ToList();
-                        lstCreatePoint.AddRange(lstLineM);
-                        //lstLineM = null;
+                        lstCreatePoint.AddRange(lstAdd);
+                        #region method 1
+                        //lstLineM = new List<SpeedProviderUpLoadVm>();
+                        //lstLineM = lstAdd.Where(x => x.SegmentID == lstSegmentID[i]
+                        //&& x.Position != $"S-{lstSegmentID[i]}"
+                        //&& x.Position != $"E-{lstSegmentID[i]}").ToList();
+                        //lstCreatePoint.AddRange(lstLineM);
+                        #endregion
                     }
-
-                    //lstAdd = null;
                 }
 
             }
@@ -517,7 +515,7 @@ namespace ReadSpeedShpFile.Services
             try
             {
                 // Kiểm tra xem có danh sách các điểm cần vẽ Point không
-                if (lstCreatePoint == null)
+                if (lstCreatePoint == null || (!lstCreatePoint.Any()))
                    return true;
 
                 string fileName = @"Out_Point_" + DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Day.ToString()
@@ -578,7 +576,7 @@ namespace ReadSpeedShpFile.Services
         {
             try
             {
-                if (lstSegmentIDLine == null)
+                if (lstSegmentIDLine == null || (!lstSegmentIDLine.Any()))
                     return true;
 
                 string fileName = @"Out_Line_" + DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Day.ToString()

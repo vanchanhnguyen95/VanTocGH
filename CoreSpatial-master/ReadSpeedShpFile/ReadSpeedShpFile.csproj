@@ -27,7 +27,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Input\02_NinhThuan\" />
     <Folder Include="Output\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
   <ItemGroup>
