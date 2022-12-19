@@ -26,6 +26,7 @@ namespace ReadSpeedShpFile
                 DataConnection = _config.GetConnectionString("DataConnection"),
                 //ColSegmendId = _config.GetConnectionString("ColSegmendId"),
                 ColSegmendId = _config.GetSection("ColSegmendId").Get<string>(),
+                ColClassfunc = _config.GetSection("ColClassfunc").Get<string>(),
                 SpInsSpeedLimit = _config.GetSection("SpInsSpeedLimit").Get<string>(),
                 SpInsSpeedLimitParamTable = _config.GetSection("SpInsSpeedLimitParamTable").Get<string>(),
                 SpGetGetSpeedLimitFromSpeedTable = _config.GetSection("SpGetGetSpeedLimitFromSpeedTable").Get<string>(),

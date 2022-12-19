@@ -11,6 +11,7 @@ namespace ReadSpeedShpFile.Common
         public string Testaaaa = @"";
 
         public static readonly string ColSegmendId = @"34";
+        public static readonly string ColClassfunc = @"2";
         public static readonly string SpInsSpeedLimit = @"[dbo].[Ins_SpeedLimit]";
         public static readonly string SpInsSpeedLimitParamTable = @"@SpeedLimit";
 

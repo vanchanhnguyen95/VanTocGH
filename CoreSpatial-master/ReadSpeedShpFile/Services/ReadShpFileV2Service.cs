@@ -195,8 +195,18 @@ namespace ReadSpeedShpFile.Services
 
                     // Đang quy định cột 34 chưa SegmentID
                     string? colSegment = speedConfig.ColSegmendId;
+                    string? colFuncString = speedConfig.ColClassfunc;
                     if (string.IsNullOrEmpty(colSegment))
                         colSegment = ColSegmendId;
+
+                    if (string.IsNullOrEmpty(colFuncString))
+                        colFuncString = ColClassfunc;
+
+                    int colFunc = Convert.ToInt32(fe.DataRow.ItemArray[Convert.ToInt32(colFuncString)]);
+
+                    // 4: đường nhỏ, loại đi
+                    if (colFunc == 4)
+                        continue;
 
                     long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[Convert.ToInt32(colSegment)]);
 

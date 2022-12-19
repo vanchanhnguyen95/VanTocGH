@@ -250,10 +250,16 @@ namespace ReadSpeedShpFile.Services
                     // Dang quy dinh cot 34 chưa SegmentID
                     //long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[34]);
                     string? colSegment = speedConfig.ColSegmendId;
+                    string? colFuncString = speedConfig.ColClassfunc;
                     if (string.IsNullOrEmpty(colSegment))
                         colSegment = ColSegmendId;
 
                     long segmentID = Convert.ToInt64(fe.DataRow.ItemArray[Convert.ToInt32(colSegment)]);
+                    int colFunc = Convert.ToInt32(fe.DataRow.ItemArray[Convert.ToInt32(colFuncString)]);
+
+                    // 4: đường nhỏ, loại đi
+                    if (colFunc == 4)
+                        continue;
 
                     foreach (var line in multiPolyLine.PolyLines)
                     {
@@ -479,13 +485,21 @@ namespace ReadSpeedShpFile.Services
                     }
                     else
                     {
-                        lstCreatePoint.AddRange(lstAdd);
+                        //lstCreatePoint.AddRange(lstAdd);
                         #region method 1
                         //lstLineM = new List<SpeedProviderUpLoadVm>();
                         //lstLineM = lstAdd.Where(x => x.SegmentID == lstSegmentID[i]
                         //&& x.Position != $"S-{lstSegmentID[i]}"
                         //&& x.Position != $"E-{lstSegmentID[i]}").ToList();
                         //lstCreatePoint.AddRange(lstLineM);
+                        #endregion
+
+                        #region method 2: Bỏ những điểm có vận tốc = 0
+                        lstLineM = new List<SpeedProviderUpLoadVm>();
+                        lstLineM = lstAdd.Where(x => x.SegmentID == lstSegmentID[i]
+                        && x.MaxSpeed > 0).ToList();
+                        lstCreatePoint.AddRange(lstLineM);
+
                         #endregion
                     }
                 }
