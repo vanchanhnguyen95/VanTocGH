@@ -10,5 +10,6 @@
         public int? MaxSpeed { get; set; }
         public bool? PointError { get; set; } = false;//True: Tọa độ cung cấp bị lỗi, False: Tọa độ cung cấp ko bị lỗi
         public long SegmentID { get; set; }
+        public int Direction { get; set; }
     }
 }

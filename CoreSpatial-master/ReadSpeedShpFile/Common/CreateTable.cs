@@ -19,6 +19,7 @@ namespace ReadSpeedShpFile.Common
             public bool? PointError { get; set; } = false;//True: Tọa độ cung cấp bị lỗi, False: Tọa độ cung cấp ko bị lỗi
             public long? SegmentID { get; set; }
             public bool? IsUpdateSpeed { get; set; }
+            public int Direction { get; set; }
             
             public DateTime? CreatedDate { get; set; }
             public DateTime? UpdatedDate { get; set; }
@@ -42,6 +43,7 @@ namespace ReadSpeedShpFile.Common
                     new SqlMetaData("PointError", SqlDbType.Bit),
                     new SqlMetaData("SegmentID", SqlDbType.BigInt),
                     new SqlMetaData("IsUpdateSpeed", SqlDbType.Bit),
+                    new SqlMetaData("Direction", SqlDbType.Int),
                     new SqlMetaData("CreatedDate", SqlDbType.DateTime),
                     new SqlMetaData("UpdatedDate", SqlDbType.DateTime),
                     new SqlMetaData("CreatedBy", SqlDbType.VarChar),
@@ -61,6 +63,7 @@ namespace ReadSpeedShpFile.Common
                     ret.SetBoolean(0, (bool)data.PointError);
                     ret.SetInt64(0, (long)data.SegmentID);
                     ret.SetBoolean(0, (bool)data.IsUpdateSpeed);
+                    ret.SetInt32(0, (int)data.Direction);
                     ret.SetDateTime(0, data.CreatedDate ?? DateTime.Now);
                     ret.SetDateTime(0, data.UpdatedDate ?? DateTime.Now);
                     ret.SetString(0, data.CreatedBy);
@@ -84,6 +87,7 @@ namespace ReadSpeedShpFile.Common
             dt.Columns.Add("PointError", typeof(bool));
             dt.Columns.Add("SegmentID", typeof(Int64));
             dt.Columns.Add("IsUpdateSpeed", typeof(bool));
+            dt.Columns.Add("Direction", typeof(Int32));
 
             dt.Columns.Add("CreatedDate", typeof(DateTime));
             dt.Columns.Add("UpdatedDate", typeof(DateTime));

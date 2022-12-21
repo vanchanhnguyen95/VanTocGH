@@ -2,8 +2,10 @@
 using System;
 //using ReadFile = ReadSpeedShpFile.Services.ReadShpFileService;
 //using WriteFile = ReadSpeedShpFile.Services.WriteShpFileService;
-using ReadFile = ReadSpeedShpFile.Services.ReadShpFileV2Service;
-using WriteFile = ReadSpeedShpFile.Services.WriteShpFileV2Service;
+using ReadFile = ReadSpeedShpFile.Services.ReadShpFileV3Service;
+//using ReadFile = ReadSpeedShpFile.Services.ReadShpFileV2Service;
+//using WriteFile = ReadSpeedShpFile.Services.WriteShpFileV2Service;
+using WriteFile = ReadSpeedShpFile.Services.WriteShpFileV3Service;
 
 namespace ReadSpeedShpFile.Controller
 {
