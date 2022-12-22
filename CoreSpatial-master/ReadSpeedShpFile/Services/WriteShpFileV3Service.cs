@@ -222,7 +222,7 @@ namespace ReadSpeedShpFile.Services
                             else
                             {
                                 position = $"M-{segmentID}-{i - 1}";
-                                positionB = $"BM-{segmentID}-{line.Points.Count() - i}";
+                                positionB = $"BM-{segmentID}-{line.Points.Count() - i - 2}";
                             }
 
                             lstSpeed.Add(new SpeedProviderUpLoadVm()
