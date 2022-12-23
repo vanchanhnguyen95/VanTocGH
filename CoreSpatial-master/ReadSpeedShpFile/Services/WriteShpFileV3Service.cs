@@ -33,6 +33,7 @@ namespace ReadSpeedShpFile.Services
         //private static List<SpeedProviderUpLoadVm> lstLineChange;// Danh sách các line có vận tốc thay đổi
         //private static List<long> lstSegmentIDLineChange;// Danh sách chứa segmentID của line có vận tốc thay đổi
         private static List<SpeedProviderUpLoadVm>? lstCreatePoint;
+        private static List<SpeedProviderUpLoadVm>? lstCreatePointFilter;
 
         public static bool CreateShpFileFromShpFile(SpeedConfig speedConfig)
         {
@@ -422,6 +423,9 @@ namespace ReadSpeedShpFile.Services
 
         private static bool WriteShpFile()
         {
+            if (!FilterPointSpeed())
+                return false;
+
             if (!WritePointShpFile())
                 return false;
 
@@ -431,13 +435,45 @@ namespace ReadSpeedShpFile.Services
             return true;
         }
 
+        // Lọc những điểm có vùng tọa độ, cùng vận tốc thì loại đi
+        private static bool FilterPointSpeed()
+        {
+            // Kiểm tra xem có danh sách các điểm cần vẽ Point không
+            if (lstCreatePoint == null || (!lstCreatePoint.Any()))
+                return true;
+
+            lstCreatePointFilter = new List<SpeedProviderUpLoadVm>();
+
+            for(int i = 0; i < lstCreatePoint.Count(); i++)
+            {
+                SpeedProviderUpLoadVm itemExist = lstCreatePointFilter
+                    .Where(x => x.Lat == lstCreatePoint[i].Lat
+                    && x.Lng == lstCreatePoint[i].Lng
+                    && x.MinSpeed == lstCreatePoint[i].MinSpeed
+                    && x.MaxSpeed == lstCreatePoint[i].MaxSpeed
+                    && x.SegmentID == lstCreatePoint[i].SegmentID
+                    ).FirstOrDefault();
+
+                if (itemExist == null)
+                {
+                    lstCreatePointFilter.Add(lstCreatePoint[i]);
+                }
+            }    
+
+            return true;
+        }    
+
         private static bool WritePointShpFile()
         {
             try
             {
+                //// Kiểm tra xem có danh sách các điểm cần vẽ Point không
+                //if (lstCreatePoint == null || (!lstCreatePoint.Any()))
+                //   return true;
+
                 // Kiểm tra xem có danh sách các điểm cần vẽ Point không
-                if (lstCreatePoint == null || (!lstCreatePoint.Any()))
-                   return true;
+                if (lstCreatePointFilter == null || (!lstCreatePointFilter.Any()))
+                    return true;
 
                 string fileName = @"Out_Point_" + DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString() + DateTime.Now.Day.ToString()
                 + DateTime.Now.Hour.ToString() + DateTime.Now.Minute.ToString() + DateTime.Now.Millisecond.ToString();
@@ -452,19 +488,20 @@ namespace ReadSpeedShpFile.Services
                 dataTable.Columns.Add("MaxSpeed", typeof(int));
                 dataTable.Columns.Add("Position", typeof(string));
 
-                for (int i = 0; i < lstCreatePoint.Count; i++)
+                //for (int i = 0; i < lstCreatePoint.Count; i++)
+                for (int i = 0; i < lstCreatePointFilter.Count; i++)
                 {
-                    var point = new GeoPoint((double)Math.Round(lstCreatePoint[i].Lng, precisions), (double)Math.Round(lstCreatePoint[i].Lat, precisions));
+                    var point = new GeoPoint((double)Math.Round(lstCreatePointFilter[i].Lng, precisions), (double)Math.Round(lstCreatePointFilter[i].Lat, precisions));
                     var feature = new Feature(new Geometry(point));
                     fs.Features.Add(feature);
 
                     var row = dataTable.NewRow();
-                    row[0] = lstCreatePoint[i].SegmentID;//SegmentID
-                    row[1] = lstCreatePoint[i].Lat;
-                    row[2] = lstCreatePoint[i].Lng;
-                    row[3] = lstCreatePoint[i].MinSpeed;//MinSpeed
-                    row[4] = lstCreatePoint[i].MaxSpeed;//MaxSpeed
-                    row[5] = lstCreatePoint[i].Position;
+                    row[0] = lstCreatePointFilter[i].SegmentID;//SegmentID
+                    row[1] = lstCreatePointFilter[i].Lat;
+                    row[2] = lstCreatePointFilter[i].Lng;
+                    row[3] = lstCreatePointFilter[i].MinSpeed;//MinSpeed
+                    row[4] = lstCreatePointFilter[i].MaxSpeed;//MaxSpeed
+                    row[5] = lstCreatePointFilter[i].Position;
 
                     dataTable.Rows.Add(row);
                 }
